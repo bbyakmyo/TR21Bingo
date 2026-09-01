@@ -409,32 +409,45 @@
         .toast.warning { background: #e0a050; color: #fff; }
         .toast.info { background: #5a6cf2; color: #fff; }
 
-        /* Shineup 리다이렉션 링크 (좌측 상단) */
+        /* 상단 네비게이션 (샤인업 + 금고) - 컨테이너 폭, 한 줄, 버튼형 */
+        .top-wrap {
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 14px 16px 0;
+        }
+        .top-links {
+            display: flex;
+            flex-direction: row;
+            align-items: stretch;
+            gap: 8px;
+        }
         .shineup-link {
-            position: fixed;
-            top: 16px;
-            left: max(16px, calc((100% - 1000px) / 2 + 16px));
-            z-index: 1000;
+            flex: 1;
             display: inline-flex;
             align-items: center;
-            gap: 5px;
-            padding: 6px 14px;
+            justify-content: center;
+            gap: 6px;
+            padding: 7px 12px;
             font-size: 0.78rem;
             font-weight: 700;
-            color: #3d52d6;
-            background: rgba(255, 255, 255, 0.8);
-            border: 1px solid rgba(130, 150, 255, 0.45);
-            border-radius: 20px;
+            color: #ffffff;
+            background: rgba(255, 255, 255, 0.12);
+            border: 1px solid rgba(255, 255, 255, 0.6);
+            border-radius: 10px;
             text-decoration: none;
             backdrop-filter: blur(6px);
-            box-shadow: 0 2px 10px rgba(80, 110, 220, 0.2);
+            box-shadow: 0 2px 8px rgba(80, 110, 220, 0.18);
             transition: all 0.2s;
             font-family: 'Noto Sans KR', sans-serif;
+            white-space: nowrap;
+            text-align: center;
+            text-shadow: 0 1px 3px rgba(60, 80, 180, 0.35);
         }
         .shineup-link:hover {
-            background: rgba(255, 255, 255, 0.96);
-            transform: translateY(-1px);
+            background: rgba(255, 255, 255, 0.2);
+            border-color: #ffffff;
             box-shadow: 0 4px 14px rgba(80, 110, 220, 0.3);
+            transform: translateY(-1px);
         }
 
         /* Footer */
@@ -486,7 +499,9 @@
             .header { padding: 6px 12px 2px; }
             .header h1 { font-size: 1.15rem; margin-bottom: 0; }
             .header p { display: none; }
-            .phase-banner { font-size: 0.68rem; padding: 4px 8px; margin: 2px auto 4px; }
+            .shineup-text { display: none; }
+            .top-wrap { padding: 10px 12px 0; }
+            .phase-banner { font-size: 0.6rem; padding: 3px 6px; margin: 2px auto 3px; line-height: 1.4; max-width: 100%; }
             .status-bar { gap: 10px; margin-bottom: 3px; }
             .stat-value { font-size: 1rem; }
             .stat-label { font-size: 0.46rem; }
@@ -518,9 +533,10 @@
             .header { padding: 2px 8px 0; }
             .header h1 { font-size: 1rem; margin: 0; }
             .header p { font-size: 0.6rem; }
-            .shineup-link { padding: 6px 9px; }
+            .shineup-link { padding: 6px 8px; font-size: 0.7rem; }
             .shineup-text { display: none; }
-            .phase-banner { font-size: 0.62rem; padding: 3px 6px; margin: 2px auto 3px; }
+            .top-wrap { padding: 8px 6px 0; }
+            .phase-banner { font-size: 0.55rem; padding: 2px 5px; margin: 2px auto 2px; line-height: 1.35; }
             .status-bar { gap: 8px; margin-bottom: 2px; }
             .stat-value { font-size: 0.88rem; }
             .stat-label { font-size: 0.4rem; }
@@ -540,6 +556,7 @@
             .rec-detail { font-size: 0.55rem; }
             .rec-score { font-size: 0.64rem; }
             .log { max-height: 60px; font-size: 0.58rem; }
+            .right-panel .card:last-child { display: none; }
             .footer { display: none; }
             .toast { font-size: 0.78rem; padding: 10px 16px; top: 10px; right: 10px; }
         }
@@ -587,7 +604,12 @@
 </head>
 <body>
 
-<a class="shineup-link" href="https://bbyakmyo.github.io/Shineup/" rel="noopener">🪄 <span class="shineup-text">얼티메이트 샤인 업!</span></a>
+<div class="top-wrap">
+    <div class="top-links">
+        <a class="shineup-link" href="https://bbyakmyo.github.io/Shineup/" rel="noopener">🪄 <span class="shineup-text">얼티메이트 샤인 업!</span></a>
+        <a class="shineup-link" href="https://bbyakmyo.github.io/TRVault/" rel="noopener">🔒 <span class="shineup-text">스핑크스의 금고</span></a>
+    </div>
+</div>
 
 <div class="header">
     <h1><span class="t-yr-num">21</span><span class="t-yr">주년</span> <span class="t-sub">스탬프 빙고!</span></h1>
