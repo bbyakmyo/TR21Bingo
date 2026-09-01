@@ -455,7 +455,7 @@
             }
             .right-panel { order: 2; }
 
-            /* 모바일: AI 추천을 보드 바로 아래에서 바로 보이도록 가로 스크롤 칩으로 변경 */
+            /* 모바일: 알고리즘 추천을 보드 바로 아래에서 바로 보이도록 가로 스크롤 칩으로 변경 */
             .rec-list {
                 display: flex;
                 gap: 8px;
@@ -482,7 +482,7 @@
             .rec-pos { font-size: 0.72rem; }
             .rec-score { font-size: 0.68rem; }
 
-            /* 위쪽 레이아웃 축소: AI 추천이 화면에 바로 보이도록 */
+            /* 위쪽 레이아웃 축소: 알고리즘 추천이 화면에 바로 보이도록 */
             .header { padding: 10px 12px 4px; }
             .header h1 { font-size: 1.25rem; margin-bottom: 2px; }
             .header p { font-size: 0.68rem; }
@@ -495,7 +495,7 @@
             .legend { margin-top: 4px; }
             .right-panel { gap: 8px; }
         }
-        /* 짧은 화면(모바일 가로/소형)에서는 보조 요소 숨겨 AI 추천 확보 */
+        /* 짧은 화면(모바일 가로/소형)에서는 보조 요소 숨겨 알고리즘 추천 확보 */
         @media (max-height: 640px) {
             .header { padding: 4px 10px 0; }
             .header p { display: none; }
@@ -568,12 +568,12 @@
 
 <div class="header">
     <h1><span class="t-yr-num">21</span><span class="t-yr">주년</span> <span class="t-sub">스탬프 빙고!</span></h1>
-    <p>AI가 최적의 수를 추천 · 5×5 · 8라운드</p>
+    <p>알고리즘이 최적의 수를 추천 · 5×5 · 8라운드</p>
 </div>
 
 <!-- Phase Banner -->
 <div class="phase-banner phase-player" id="phaseBanner">
-    🎯 AI 추천을 참고하여 <b>내 셀</b>을 선택하세요
+    🎯 알고리즘 추천을 참고하여 <b>내 셀</b>을 선택하세요
 </div>
 
 <!-- Status Bar -->
@@ -615,7 +615,7 @@
                     </div>
                     <div class="legend-item">
                     <div class="legend-dot" style="border: 2px solid #4a6cf5; background: transparent;"></div>
-                        <span>AI 추천</span>
+                        <span>알고리즘 추천</span>
                     </div>
                 </div>
                 <div style="margin-top: 10px;">
@@ -634,7 +634,7 @@
     <div class="right-panel">
         <!-- Recommendations -->
         <div class="card">
-            <div class="card-title">🏆 AI 추천 TOP 5</div>
+            <div class="card-title">🏆 알고리즘 추천 TOP 5</div>
             <ul class="rec-list" id="recList">
                 <li style="color:#6f7cc0; font-size:0.8rem; padding:16px; text-align:center;">
                     게임을 시작하면 추천이 표시됩니다
@@ -646,7 +646,7 @@
         <div class="card">
             <div class="card-title">📜 게임 로그</div>
             <div class="log" id="gameLog">
-                <div style="color:#6f7cc0; font-size:0.75rem;">AI 추천 셀을 클릭하여 시작하세요</div>
+                <div style="color:#6f7cc0; font-size:0.75rem;">알고리즘 추천 셀을 클릭하여 시작하세요</div>
             </div>
         </div>
     </div>
@@ -732,7 +732,7 @@ function cellScoreV3(pos, filled, remainingRounds) {
     return score;
 }
 
-// ---- AI 추천 (v3 Greedy) ----
+// ---- 알고리즘 추천 (v3 Greedy) ----
 function getRecommendations(filled, remainingClicks) {
     if (remainingClicks <= 0) return [];
     const unfilled = getUnfilled(filled);
@@ -749,7 +749,7 @@ function getRecommendations(filled, remainingClicks) {
 // ============================================================
 // 게임 상태
 // ============================================================
-// phase: 'player' = AI 추천 보고 플레이어가 자기 셀 선택
+// phase: 'player' = 알고리즘 추천 보고 플레이어가 자기 셀 선택
 //        'random' = 플레이어가 랜덤 배치할 곳 선택
 //        'done'   = 게임 종료
 let gameState = {
@@ -905,7 +905,7 @@ function updateUI() {
     const banner = document.getElementById('phaseBanner');
     if (gameState.phase === 'player') {
         banner.className = 'phase-banner phase-player';
-        banner.innerHTML = '🎯 AI 추천을 참고하여 <b>내 셀</b>을 선택하세요';
+        banner.innerHTML = '🎯 알고리즘 추천을 참고하여 <b>내 셀</b>을 선택하세요';
     } else if (gameState.phase === 'random') {
         banner.className = 'phase-banner phase-random';
         banner.innerHTML = '🎲 <b>랜덤으로 채울 위치</b>를 지정하세요';
