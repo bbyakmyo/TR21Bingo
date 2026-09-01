@@ -1,0 +1,985 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>봄빛PICK크닉</title>    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🌸</text></svg>">    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;700;900&display=swap');
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        :root {
+            --board-size: 369px;
+            --cell-w: 70px;
+            --cell-h: 70px;
+            --cell-gap: 3px;
+        }
+
+        body {
+            font-family: 'Noto Sans KR', 'Segoe UI', sans-serif;
+            background: linear-gradient(160deg, #9196F2 0%, #91C0F5 45%, #91EBF3 100%);
+            background-attachment: fixed;
+            color: #333f66;
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        /* Header */
+        .header {
+            text-align: center;
+            padding: 28px 20px 10px;
+        }
+        .header h1 {
+            font-size: 2rem;
+            font-weight: 900;
+            margin-bottom: 4px;
+            letter-spacing: 1px;
+        }
+        .t-yr-num {
+            color: #ffffff;
+            text-shadow: 0 2px 12px rgba(120, 140, 255, 0.45);
+        }
+        .t-yr {
+            background: linear-gradient(135deg, #ffffff 0%, #b8c2ff 45%, #6a7cf2 100%);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .t-sub {
+            background: linear-gradient(135deg, #ff8fb8 0%, #ffb86b 50%, #ffd76e 100%);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .header p {
+            color: rgba(255, 255, 255, 0.92);
+            font-size: 0.85rem;
+        }
+
+        /* Phase Banner */
+        .phase-banner {
+            text-align: center;
+            padding: 10px;
+            margin: 8px auto;
+            max-width: 500px;
+            border-radius: 10px;
+            font-weight: 700;
+            font-size: 0.95rem;
+            transition: all 0.3s;
+        }
+        .phase-banner.phase-player {
+            background: rgba(255, 255, 255, 0.25);
+            border: 1px solid rgba(255, 255, 255, 0.45);
+            color: #3d4fd6;
+        }
+        .phase-banner.phase-random {
+            background: rgba(255, 255, 255, 0.22);
+            border: 1px solid rgba(255, 255, 255, 0.4);
+            color: #1a9fc0;
+        }
+        .phase-banner.phase-done {
+            background: rgba(255, 210, 130, 0.25);
+            border: 1px solid rgba(255, 200, 110, 0.5);
+            color: #e08c2a;
+        }
+
+        /* Main Layout */
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 0 16px 40px;
+            display: grid;
+            grid-template-columns: 1fr 300px;
+            gap: 20px;
+            align-items: start;
+        }
+
+        /* Card */
+        .card {
+            background: rgba(255, 255, 255, 0.72);
+            border-radius: 14px;
+            padding: 20px;
+            border: 1px solid rgba(130, 150, 255, 0.25);
+            backdrop-filter: blur(10px);
+            box-shadow: 0 4px 20px rgba(80, 110, 220, 0.18);
+        }
+        .card-title {
+            font-size: 0.9rem;
+            font-weight: 700;
+            color: #5a6cf2;
+            margin-bottom: 14px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        /* Status Bar */
+        .status-bar {
+            display: flex;
+            justify-content: center;
+            gap: 24px;
+            flex-wrap: wrap;
+            margin-bottom: 12px;
+        }
+        .stat-item { text-align: center; }
+        .stat-value {
+            font-size: 1.6rem;
+            font-weight: 900;
+            color: #6a7cf2;
+        }
+        .stat-value.bingo-count { color: #2fc0e8; }
+        .stat-label {
+            font-size: 0.65rem;
+            color: #6f7cc0;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        /* Board Area */
+        .board-area {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        .board-bg {
+            background: url('IMG/bg.png') center/100% 100% no-repeat;
+            width: var(--board-size);
+            aspect-ratio: 369 / 368;
+            max-width: 406px;
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .board {
+            display: grid;
+            grid-template-columns: repeat(5, var(--cell-w));
+            grid-template-rows: repeat(5, var(--cell-h));
+            gap: var(--cell-gap);
+            position: relative;
+        }
+        .cell {
+            width: var(--cell-w);
+            height: var(--cell-h);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            position: relative;
+            transition: all 0.15s ease;
+            background: url('IMG/is_inactive.png') center/contain no-repeat;
+            border: none;
+            outline: none;
+        }
+        .cell .cell-label {
+            font-size: 0.65rem;
+            font-weight: 700;
+            color: rgba(90, 105, 190, 0.65);
+            pointer-events: none;
+        }
+        .cell:hover:not(.filled) {
+            transform: scale(1.08);
+            filter: brightness(1.3);
+        }
+        .cell.filled {
+            background: url('IMG/is_active.png') center/contain no-repeat;
+            cursor: default;
+        }
+        .cell.filled .cell-label {
+            color: rgba(255,255,255,0.8);
+            font-size: 0.7rem;
+        }
+        .cell.bingo {
+            background: url('IMG/is_bingo.png') center/contain no-repeat;
+        }
+
+        /* Recommend highlight */
+        .cell.recommend-1 {
+            filter: brightness(1.1) drop-shadow(0 0 8px rgba(64, 190, 240, 0.7));
+            animation: pulse-gold 1.5s ease-in-out infinite;
+        }
+        .cell.recommend-2 {
+            filter: brightness(1.05) drop-shadow(0 0 5px rgba(64, 190, 240, 0.4));
+        }
+        .cell.recommend-3 {
+            filter: brightness(1.03) drop-shadow(0 0 3px rgba(90, 108, 242, 0.3));
+        }
+        .cell .rank-badge {
+            position: absolute;
+            top: -4px;
+            right: -4px;
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            background: #ff6b9d;
+            color: #fff;
+            font-size: 0.6rem;
+            font-weight: 900;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 2px 6px rgba(200,100,120,0.4);
+            pointer-events: none;
+        }
+
+        /* Random target highlight */
+        .cell.random-target {
+            filter: brightness(1.05) drop-shadow(0 0 8px rgba(47, 224, 232, 0.6));
+            animation: pulse-green 1s ease-in-out infinite;
+        }
+
+        @keyframes pulse-gold {
+            0%, 100% { filter: brightness(1.1) drop-shadow(0 0 8px rgba(64,190,240,0.7)); }
+            50% { filter: brightness(1.2) drop-shadow(0 0 14px rgba(64,190,240,0.9)); }
+        }
+        @keyframes pulse-green {
+            0%, 100% { filter: brightness(1.05) drop-shadow(0 0 8px rgba(47,224,232,0.6)); }
+            50% { filter: brightness(1.12) drop-shadow(0 0 14px rgba(47,224,232,0.8)); }
+        }
+
+        /* Line indicators */
+        .line-indicators {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 5px;
+            justify-content: center;
+            margin-top: 10px;
+        }
+        .line-ind {
+            width: 34px;
+            height: 22px;
+            border-radius: 5px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.55rem;
+            font-weight: 700;
+            background: rgba(255, 255, 255, 0.3);
+            color: #6f7cc0;
+            transition: all 0.3s;
+        }
+        .line-ind.complete {
+            background: #2fc0e8;
+            color: #fff;
+            box-shadow: 0 0 8px rgba(47,192,232,0.45);
+        }
+        .line-ind.progress-high {
+            background: rgba(64, 190, 240, 0.18);
+            color: #2a8cc0;
+        }
+
+        /* Controls */
+        .controls {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            margin-top: 14px;
+        }
+        .btn {
+            padding: 9px 20px;
+            border: none;
+            border-radius: 8px;
+            font-size: 0.8rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-family: 'Noto Sans KR', sans-serif;
+        }
+        .btn-undo {
+            background: rgba(90, 108, 242, 0.12);
+            color: #5a6cf2;
+            border: 1px solid rgba(90, 108, 242, 0.3);
+        }
+        .btn-undo:hover:not(:disabled) {
+            background: rgba(90, 108, 242, 0.22);
+            transform: translateY(-1px);
+        }
+        .btn-danger {
+            background: rgba(255, 140, 90, 0.14);
+            color: #e0743a;
+            border: 1px solid rgba(255, 140, 90, 0.28);
+        }
+        .btn-danger:hover:not(:disabled) {
+            background: rgba(255, 140, 90, 0.24);
+            transform: translateY(-1px);
+        }
+        .btn:disabled {
+            opacity: 0.3;
+            cursor: not-allowed;
+            transform: none !important;
+        }
+
+        /* Right Panel */
+        .right-panel {
+            display: flex;
+            flex-direction: column;
+            gap: 14px;
+        }
+
+        /* Rec List */
+        .rec-list { list-style: none; }
+        .rec-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 10px;
+            border-radius: 8px;
+            margin-bottom: 4px;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+        .rec-item:hover { background: rgba(90, 108, 242, 0.06); }
+        .rec-rank {
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.7rem;
+            font-weight: 900;
+            flex-shrink: 0;
+        }
+        .rec-rank.rank-1 { background: #ff6b9d; color: #fff; }
+        .rec-rank.rank-2 { background: #ffc46b; color: #fff; }
+        .rec-rank.rank-3 { background: #35d0c0; color: #fff; }
+        .rec-rank.rank-other { background: rgba(120, 140, 255, 0.16); color: #5a6cf2; }
+        .rec-info { flex: 1; min-width: 0; }
+        .rec-pos { font-weight: 700; font-size: 0.8rem; }
+        .rec-detail { font-size: 0.6rem; color: #6f7cc0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .rec-score { font-weight: 800; font-size: 0.8rem; color: #5a6cf2; flex-shrink: 0; }
+
+        /* Log */
+        .log {
+            max-height: 180px;
+            overflow-y: auto;
+            font-size: 0.7rem;
+            line-height: 1.8;
+        }
+        .log-entry {
+            padding: 2px 0;
+            border-bottom: 1px solid rgba(120, 140, 255, 0.12);
+        }
+        .log-entry .round-num { color: #5a6cf2; font-weight: 700; }
+        .log-entry .player-move { color: #ff6b9d; }
+        .log-entry .random-move { color: #1a9fc0; }
+
+        /* Legend */
+        .legend {
+            display: flex;
+            gap: 14px;
+            justify-content: center;
+            font-size: 0.65rem;
+            margin-top: 8px;
+            color: #4a5aa8;
+        }
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+        .legend-dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 3px;
+        }
+
+        /* Scrollbar */
+        ::-webkit-scrollbar { width: 3px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: #9ad9f0; border-radius: 3px; }
+
+        /* Toast */
+        .toast {
+            position: fixed;
+            top: 16px;
+            right: 16px;
+            padding: 12px 20px;
+            border-radius: 10px;
+            font-weight: 700;
+            font-size: 0.85rem;
+            z-index: 1000;
+            transform: translateX(120%);
+            transition: transform 0.3s ease;
+            box-shadow: 0 6px 24px rgba(0,0,0,0.5);
+        }
+        .toast.show { transform: translateX(0); }
+        .toast.success { background: #35b8a0; color: #fff; }
+        .toast.warning { background: #e0a050; color: #fff; }
+        .toast.info { background: #5a6cf2; color: #fff; }
+
+        /* ======================== 반응형: 태블릿 ======================== */
+        @media (max-width: 860px) {
+            .container {
+                grid-template-columns: 1fr;
+                max-width: 520px;
+            }
+            .right-panel { order: 2; }
+        }
+        @media (max-width: 520px) and (min-width: 481px) {
+            :root {
+                --board-size: calc(100vw - 56px);
+                --cell-w: calc((100vw - 56px) * 70 / 369);
+                --cell-h: calc((100vw - 56px) * 70 / 369);
+                --cell-gap: calc((100vw - 56px) * 3 / 369);
+            }
+            .container { padding: 0 12px 30px; max-width: 100%; }
+        }
+
+        /* ======================== 반응형: 모바일 ======================== */
+        @media (max-width: 480px) {
+            :root {
+                --board-size: calc(100vw - 48px);
+                --cell-w: calc((100vw - 48px) * 70 / 369);
+                --cell-h: calc((100vw - 48px) * 70 / 369);
+                --cell-gap: calc((100vw - 48px) * 3 / 369);
+            }
+            .header { padding: 16px 12px 6px; }
+            .header h1 { font-size: 1.4rem; }
+            .header p { font-size: 0.75rem; }
+            .phase-banner { font-size: 0.82rem; padding: 8px; margin: 6px 12px; }
+            .status-bar { gap: 14px; margin-bottom: 8px; }
+            .stat-value { font-size: 1.3rem; }
+            .stat-label { font-size: 0.58rem; }
+            .container { padding: 0 8px 24px; grid-template-columns: 1fr; max-width: 100%; }
+            .card { padding: 14px 10px; border-radius: 10px; }
+            .cell .cell-label { font-size: 0.5rem; }
+            .cell.filled .cell-label { font-size: 0.55rem; }
+            .cell .rank-badge { width: 15px; height: 15px; font-size: 0.5rem; top: -3px; right: -3px; }
+            .line-ind { width: 28px; height: 18px; font-size: 0.48rem; }
+            .line-indicators { gap: 3px; }
+            .controls { gap: 8px; margin-top: 10px; }
+            .btn { padding: 8px 14px; font-size: 0.75rem; }
+            .rec-item { padding: 6px 8px; }
+            .rec-rank { width: 20px; height: 20px; font-size: 0.6rem; }
+            .rec-pos { font-size: 0.75rem; }
+            .rec-detail { font-size: 0.55rem; }
+            .rec-score { font-size: 0.75rem; }
+            .log { max-height: 140px; font-size: 0.65rem; }
+            .legend { font-size: 0.58rem; gap: 10px; }
+            .toast { font-size: 0.78rem; padding: 10px 16px; top: 10px; right: 10px; }
+        }
+
+        /* ======================== 반응형: 소형 모바일 ======================== */
+        @media (max-width: 360px) {
+            :root {
+                --board-size: calc(100vw - 32px);
+                --cell-w: calc((100vw - 32px) * 70 / 369);
+                --cell-h: calc((100vw - 32px) * 70 / 369);
+                --cell-gap: calc((100vw - 32px) * 3 / 369);
+            }
+            .header h1 { font-size: 1.2rem; }
+            .container { padding: 0 4px 20px; }
+            .card { padding: 10px 8px; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="header">
+    <h1><span class="t-yr-num">21</span><span class="t-yr">주년</span> <span class="t-sub">스탬프 빙고!</span></h1>
+    <p>AI가 최적의 수를 추천 · 5×5 · 8라운드</p>
+</div>
+
+<!-- Phase Banner -->
+<div class="phase-banner phase-player" id="phaseBanner">
+    🎯 AI 추천을 참고하여 <b>내 셀</b>을 선택하세요
+</div>
+
+<!-- Status Bar -->
+<div class="status-bar">
+    <div class="stat-item">
+        <div class="stat-value" id="roundDisplay">0/8</div>
+        <div class="stat-label">라운드</div>
+    </div>
+    <div class="stat-item">
+        <div class="stat-value bingo-count" id="bingoDisplay">0</div>
+        <div class="stat-label">빙고</div>
+    </div>
+    <div class="stat-item">
+        <div class="stat-value" id="filledDisplay">0/25</div>
+        <div class="stat-label">채워진 칸</div>
+    </div>
+    <div class="stat-item">
+        <div class="stat-value" id="clicksDisplay">8</div>
+        <div class="stat-label">남은 클릭</div>
+    </div>
+</div>
+
+<div class="container">
+    <!-- Left: Board -->
+    <div>
+        <div class="card">
+            <div class="board-area">
+                <div class="board-bg">
+                    <div class="board" id="board"></div>
+                </div>
+                <div class="legend">
+                    <div class="legend-item">
+                        <div class="legend-dot" style="background:#ff6b9d"></div>
+                        <span>내 선택</span>
+                    </div>
+                    <div class="legend-item">
+                        <div class="legend-dot" style="background:#35d0c0"></div>
+                        <span>랜덤 배치</span>
+                    </div>
+                    <div class="legend-item">
+                    <div class="legend-dot" style="border: 2px solid #4a6cf5; background: transparent;"></div>
+                        <span>AI 추천</span>
+                    </div>
+                </div>
+                <div style="margin-top: 10px;">
+                    <div style="font-size:0.65rem; color:#6f7cc0; margin-bottom:5px; text-align:center;">라인 상태 (행5 · 열5 · 대각2)</div>
+                    <div class="line-indicators" id="lineIndicators"></div>
+                </div>
+            </div>
+            <div class="controls">
+                <button class="btn btn-undo" id="btnUndo" onclick="undoLastTurn()" disabled>↩ 되돌리기</button>
+                <button class="btn btn-danger" onclick="resetGame()">🔄 리셋</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Right Panel -->
+    <div class="right-panel">
+        <!-- Recommendations -->
+        <div class="card">
+            <div class="card-title">🏆 AI 추천 TOP 5</div>
+            <ul class="rec-list" id="recList">
+                <li style="color:#6f7cc0; font-size:0.8rem; padding:16px; text-align:center;">
+                    게임을 시작하면 추천이 표시됩니다
+                </li>
+            </ul>
+        </div>
+
+        <!-- Game Log -->
+        <div class="card">
+            <div class="card-title">📜 게임 로그</div>
+            <div class="log" id="gameLog">
+                <div style="color:#6f7cc0; font-size:0.75rem;">AI 추천 셀을 클릭하여 시작하세요</div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+// ============================================================
+// 빙고 최적화 알고리즘
+// ============================================================
+const LINES = [
+    [0,1,2,3,4], [5,6,7,8,9], [10,11,12,13,14], [15,16,17,18,19], [20,21,22,23,24],
+    [0,5,10,15,20], [1,6,11,16,21], [2,7,12,17,22], [3,8,13,18,23], [4,9,14,19,24],
+    [0,6,12,18,24], [4,8,12,16,20]
+];
+const LINE_NAMES = ['행1','행2','행3','행4','행5','열1','열2','열3','열4','열5','↘대각','↙대각'];
+
+const CELL_LINES = Array.from({length: 25}, (_, i) =>
+    LINES.reduce((acc, line, j) => { if (line.includes(i)) acc.push(j); return acc; }, [])
+);
+const CELL_STATIC_VALUE = CELL_LINES.map(l => l.length);
+
+function countBingo(filled) {
+    let count = 0;
+    for (const line of LINES) {
+        if (line.every(p => filled.has(p))) count++;
+    }
+    return count;
+}
+
+function getCompletedLines(filled) {
+    const result = [];
+    LINES.forEach((line, i) => {
+        if (line.every(p => filled.has(p))) result.push(i);
+    });
+    return result;
+}
+
+function getLineProgress(filled) {
+    return LINES.map(line => line.filter(p => filled.has(p)).length);
+}
+
+function getUnfilled(filled) {
+    const r = [];
+    for (let i = 0; i < 25; i++) if (!filled.has(i)) r.push(i);
+    return r;
+}
+
+// ---- v3 Greedy 휴리스틱 (벤치마크 검증 완료: MC보다 우수) ----
+function cellScoreV3(pos, filled, remainingRounds) {
+    let score = 0;
+    const totalFuture = remainingRounds * 2;
+    const emptyCount = Math.max(1, 25 - filled.size - 1);
+    let completions = 0;
+    let nearComplete = 0;
+
+    for (const li of CELL_LINES[pos]) {
+        const line = LINES[li];
+        let filledCount = 0;
+        for (const p of line) if (filled.has(p)) filledCount++;
+        const needed = 4 - filledCount;
+
+        if (needed === 0) {
+            completions++;
+            score += 50000;
+        } else if (needed === 1) {
+            nearComplete++;
+            const probComplete = 1 - Math.pow(1 - 1/emptyCount, remainingRounds);
+            score += 3000 * probComplete;
+        } else if (needed === 2) {
+            score += totalFuture >= needed ? 80 : 10;
+        } else if (needed === 3) {
+            score += remainingRounds >= 5 ? 8 : 1;
+        }
+    }
+
+    if (completions >= 2) score += completions * 15000;
+    if (nearComplete >= 2) score += nearComplete * 300;
+    score += CELL_STATIC_VALUE[pos] * 3;
+    return score;
+}
+
+// ---- AI 추천 (v3 Greedy) ----
+function getRecommendations(filled, remainingClicks) {
+    if (remainingClicks <= 0) return [];
+    const unfilled = getUnfilled(filled);
+    if (unfilled.length === 0) return [];
+
+    const results = unfilled.map(pos => ({
+        pos,
+        score: cellScoreV3(pos, filled, remainingClicks)
+    }));
+    results.sort((a, b) => b.score - a.score);
+    return results;
+}
+
+// ============================================================
+// 게임 상태
+// ============================================================
+// phase: 'player' = AI 추천 보고 플레이어가 자기 셀 선택
+//        'random' = 플레이어가 랜덤 배치할 곳 선택
+//        'done'   = 게임 종료
+let gameState = {
+    filled: new Set(),
+    playerCells: new Set(),
+    randomCells: new Set(),
+    round: 0,
+    maxRounds: 8,
+    phase: 'player',
+    recommendations: [],
+    log: [],
+    history: [],        // undo용 스냅샷
+    pendingPlayerPos: -1 // player가 선택한 셀 (random 대기중)
+};
+
+function snapshot() {
+    return {
+        filled: new Set(gameState.filled),
+        playerCells: new Set(gameState.playerCells),
+        randomCells: new Set(gameState.randomCells),
+        round: gameState.round,
+        phase: gameState.phase,
+        log: [...gameState.log],
+        pendingPlayerPos: gameState.pendingPlayerPos
+    };
+}
+
+function restoreSnapshot(snap) {
+    gameState.filled = new Set(snap.filled);
+    gameState.playerCells = new Set(snap.playerCells);
+    gameState.randomCells = new Set(snap.randomCells);
+    gameState.round = snap.round;
+    gameState.phase = snap.phase;
+    gameState.log = [...snap.log];
+    gameState.pendingPlayerPos = snap.pendingPlayerPos;
+}
+
+function resetGame() {
+    gameState = {
+        filled: new Set(),
+        playerCells: new Set(),
+        randomCells: new Set(),
+        round: 0,
+        maxRounds: 8,
+        phase: 'player',
+        recommendations: [],
+        log: [],
+        history: [],
+        pendingPlayerPos: -1
+    };
+    updateAll();
+    showToast('게임이 리셋되었습니다', 'info');
+}
+
+function undoLastTurn() {
+    if (gameState.history.length === 0) return;
+    const snap = gameState.history.pop();
+    restoreSnapshot(snap);
+    updateAll();
+    showToast('되돌리기 완료', 'info');
+}
+
+// ============================================================
+// 셀 클릭 핸들러 (2단계 턴)
+// ============================================================
+function handleCellClick(pos) {
+    if (gameState.phase === 'done') return;
+    if (gameState.filled.has(pos)) return;
+
+    if (gameState.phase === 'player') {
+        // 스냅샷 저장 (undo용)
+        gameState.history.push(snapshot());
+
+        // 플레이어 셀 선택
+        gameState.filled.add(pos);
+        gameState.playerCells.add(pos);
+        gameState.pendingPlayerPos = pos;
+
+        const row = Math.floor(pos / 5), col = pos % 5;
+        gameState.log.push(
+            `<span class="round-num">R${gameState.round + 1}</span> ` +
+            `<span class="player-move">내 선택 (${row},${col})</span>`
+        );
+
+        // 랜덤 배치 단계로 전환
+        const unfilled = getUnfilled(gameState.filled);
+        if (unfilled.length > 0) {
+            gameState.phase = 'random';
+        } else {
+            // 보드가 꽉 찼으면 바로 라운드 종료
+            gameState.round++;
+            if (gameState.round >= gameState.maxRounds) {
+                gameState.phase = 'done';
+                const bingo = countBingo(gameState.filled);
+                gameState.log.push(`<b>🎯 게임 종료! ${bingo}빙고!</b>`);
+                showToast(`게임 종료! ${bingo}빙고 달성!`, 'success');
+            } else {
+                gameState.phase = 'player';
+            }
+        }
+
+        updateAll();
+
+    } else if (gameState.phase === 'random') {
+        // 랜덤 배치 지정
+        gameState.filled.add(pos);
+        gameState.randomCells.add(pos);
+
+        const row = Math.floor(pos / 5), col = pos % 5;
+        // 마지막 로그에 추가
+        const lastIdx = gameState.log.length - 1;
+        gameState.log[lastIdx] += ` · <span class="random-move">랜덤 (${row},${col})</span>`;
+
+        const bingo = countBingo(gameState.filled);
+        gameState.log[lastIdx] += ` · 빙고: ${bingo}`;
+
+        gameState.round++;
+        gameState.pendingPlayerPos = -1;
+
+        if (gameState.round >= gameState.maxRounds) {
+            gameState.phase = 'done';
+            gameState.log.push(`<b>🎯 게임 종료! ${bingo}빙고!</b>`);
+            showToast(`게임 종료! ${bingo}빙고 달성!`, 'success');
+        } else {
+            gameState.phase = 'player';
+        }
+
+        updateAll();
+    }
+}
+
+// ============================================================
+// UI
+// ============================================================
+function updateAll() {
+    updateRecommendations();
+    updateUI();
+}
+
+function updateUI() {
+    const filled = gameState.filled;
+    const bingo = countBingo(filled);
+    const completedLines = getCompletedLines(filled);
+    const progress = getLineProgress(filled);
+
+    // Status
+    document.getElementById('roundDisplay').textContent = `${gameState.round}/${gameState.maxRounds}`;
+    document.getElementById('bingoDisplay').textContent = bingo;
+    document.getElementById('filledDisplay').textContent = `${filled.size}/25`;
+    document.getElementById('clicksDisplay').textContent = `${gameState.maxRounds - gameState.round}`;
+
+    // Phase Banner
+    const banner = document.getElementById('phaseBanner');
+    if (gameState.phase === 'player') {
+        banner.className = 'phase-banner phase-player';
+        banner.innerHTML = '🎯 AI 추천을 참고하여 <b>내 셀</b>을 선택하세요';
+    } else if (gameState.phase === 'random') {
+        banner.className = 'phase-banner phase-random';
+        banner.innerHTML = '🎲 <b>랜덤으로 채울 위치</b>를 지정하세요';
+    } else {
+        banner.className = 'phase-banner phase-done';
+        banner.innerHTML = `🏆 게임 종료! <b>${bingo}빙고</b> 달성!`;
+    }
+
+    // 완성된 라인 셀
+    const inBingoLine = new Set();
+    for (const li of completedLines) {
+        for (const p of LINES[li]) inBingoLine.add(p);
+    }
+
+    // Recs map
+    const recs = gameState.recommendations;
+    const recMap = {};
+    if (gameState.phase === 'player') {
+        recs.slice(0, 5).forEach((r, i) => { recMap[r.pos] = i + 1; });
+    }
+
+    // Board
+    const board = document.getElementById('board');
+    board.innerHTML = '';
+    for (let i = 0; i < 25; i++) {
+        const cell = document.createElement('div');
+        cell.className = 'cell';
+        const row = Math.floor(i / 5), col = i % 5;
+
+        const label = document.createElement('span');
+        label.className = 'cell-label';
+
+        if (gameState.playerCells.has(i)) {
+            cell.classList.add('filled');
+            label.textContent = 'P';
+            label.style.color = 'rgba(255,107,157,0.95)';
+        } else if (gameState.randomCells.has(i)) {
+            cell.classList.add('filled');
+            label.textContent = 'R';
+            label.style.color = 'rgba(26,159,192,0.95)';
+        } else {
+            label.textContent = `${row},${col}`;
+
+            // 추천 하이라이트 (player phase만)
+            if (gameState.phase === 'player' && recMap[i]) {
+                const rank = recMap[i];
+                if (rank === 1) cell.classList.add('recommend-1');
+                else if (rank === 2) cell.classList.add('recommend-2');
+                else if (rank <= 5) cell.classList.add('recommend-3');
+
+                const badge = document.createElement('div');
+                badge.className = 'rank-badge';
+                badge.textContent = rank;
+                cell.appendChild(badge);
+            }
+
+            // random phase: 빈 셀 클릭 가능 표시
+            if (gameState.phase === 'random') {
+                cell.classList.add('random-target');
+            }
+
+            cell.onclick = () => handleCellClick(i);
+        }
+
+        cell.appendChild(label);
+
+        if (inBingoLine.has(i) && filled.has(i)) {
+            cell.classList.add('bingo');
+            cell.style.filter = 'brightness(1.2) drop-shadow(0 0 10px rgba(64,190,240,0.6))';
+        }
+
+        board.appendChild(cell);
+    }
+
+    // Line indicators
+    const lineInd = document.getElementById('lineIndicators');
+    lineInd.innerHTML = '';
+    for (let i = 0; i < 12; i++) {
+        const ind = document.createElement('div');
+        ind.className = 'line-ind';
+        ind.textContent = LINE_NAMES[i];
+        if (completedLines.includes(i)) ind.classList.add('complete');
+        else if (progress[i] >= 3) ind.classList.add('progress-high');
+        lineInd.appendChild(ind);
+    }
+
+    // Log
+    const logEl = document.getElementById('gameLog');
+    logEl.innerHTML = gameState.log.map(l => `<div class="log-entry">${l}</div>`).join('');
+    logEl.scrollTop = logEl.scrollHeight;
+
+    // Undo button
+    document.getElementById('btnUndo').disabled = gameState.history.length === 0;
+}
+
+function updateRecommendations() {
+    const recList = document.getElementById('recList');
+
+    if (gameState.phase === 'done') {
+        recList.innerHTML = '<li style="color:#6f7cc0; font-size:0.8rem; padding:16px; text-align:center;">게임이 종료되었습니다</li>';
+        gameState.recommendations = [];
+        return;
+    }
+
+    if (gameState.phase === 'random') {
+        recList.innerHTML = '<li style="color:#1a9fc0; font-size:0.8rem; padding:16px; text-align:center;">🎲 빈 칸을 클릭하여 랜덤 위치를 지정하세요</li>';
+        gameState.recommendations = [];
+        return;
+    }
+
+    const recs = getRecommendations(
+        gameState.filled,
+        gameState.maxRounds - gameState.round
+    );
+    gameState.recommendations = recs;
+
+    const top5 = recs.slice(0, 5);
+    if (top5.length === 0) {
+        recList.innerHTML = '<li style="color:#6f7cc0;">추천할 셀이 없습니다</li>';
+    } else {
+        const maxScore = top5[0].score;
+        recList.innerHTML = top5.map((r, i) => {
+            const row = Math.floor(r.pos / 5), col = r.pos % 5;
+            const pct = maxScore > 0 ? ((r.score / maxScore) * 100).toFixed(0) : 0;
+
+            let rankClass = 'rank-other';
+            if (i === 0) rankClass = 'rank-1';
+            else if (i === 1) rankClass = 'rank-2';
+            else if (i === 2) rankClass = 'rank-3';
+
+            const lines = CELL_LINES[r.pos];
+            const willComplete = lines.filter(li => {
+                const fc = LINES[li].filter(p => gameState.filled.has(p)).length;
+                return fc === 4;
+            }).map(li => LINE_NAMES[li]);
+
+            let detail = `라인: ${lines.map(li => LINE_NAMES[li]).join(', ')}`;
+            if (willComplete.length) detail = `✅ 완성: ${willComplete.join(', ')}`;
+
+            return `<li class="rec-item" onclick="handleCellClick(${r.pos})">
+                <div class="rec-rank ${rankClass}">${i + 1}</div>
+                <div class="rec-info">
+                    <div class="rec-pos">(${row}, ${col})</div>
+                    <div class="rec-detail">${detail}</div>
+                </div>
+                <div class="rec-score" title="점수: ${pct}%">${pct}%</div>
+            </li>`;
+        }).join('');
+    }
+}
+
+// ============================================================
+// 유틸
+// ============================================================
+function showToast(msg, type = 'info') {
+    const t = document.getElementById('toast');
+    t.textContent = msg;
+    t.className = `toast ${type} show`;
+    setTimeout(() => t.classList.remove('show'), 2500);
+}
+
+// ============================================================
+// 초기화
+// ============================================================
+updateAll();
+</script>
+
+</body>
+</html>
