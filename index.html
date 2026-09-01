@@ -439,7 +439,7 @@
             box-shadow: 0 2px 8px rgba(80, 110, 220, 0.18);
             transition: all 0.2s;
             font-family: 'Noto Sans KR', sans-serif;
-            white-space: nowrap;
+            min-width: 0;
             text-align: center;
             text-shadow: 0 1px 3px rgba(60, 80, 180, 0.35);
         }
@@ -499,9 +499,10 @@
             .header { padding: 6px 12px 2px; }
             .header h1 { font-size: 1.15rem; margin-bottom: 0; }
             .header p { display: none; }
-            .shineup-text { display: none; }
+            .shineup-text { display: inline; }
             .top-wrap { padding: 10px 12px 0; }
-            .phase-banner { font-size: 0.6rem; padding: 3px 6px; margin: 2px auto 3px; line-height: 1.4; max-width: 100%; }
+            .line-state-wrap { display: none; }
+            .phase-banner { font-size: 0.6rem; padding: 3px 6px; margin: 2px auto 3px; line-height: 1.4; max-width: min(320px, calc(100% - 32px)); }
             .status-bar { gap: 10px; margin-bottom: 3px; }
             .stat-value { font-size: 1rem; }
             .stat-label { font-size: 0.46rem; }
@@ -514,10 +515,10 @@
         /* 짧은 화면(모바일 가로/소형): 한 화면에 다 들어가도록 보조 요소 숨김 + 보드 축소 */
         @media (max-width: 520px) and (min-width: 481px) {
             :root {
-                --board-size: calc(100vw - 56px);
-                --cell-w: calc((100vw - 56px) * 66 / 369);
-                --cell-h: calc((100vw - 56px) * 66 / 369);
-                --cell-gap: calc((100vw - 56px) * 3 / 369);
+                --board-size: min(calc(100vw - 56px), 369px);
+                --cell-w: calc(var(--board-size) * 66 / 369);
+                --cell-h: calc(var(--board-size) * 66 / 369);
+                --cell-gap: calc(var(--board-size) * 3 / 369);
             }
             .container { padding: 0 12px 30px; max-width: 100%; }
         }
@@ -533,10 +534,10 @@
             .header { padding: 2px 8px 0; }
             .header h1 { font-size: 1rem; margin: 0; }
             .header p { font-size: 0.6rem; }
-            .shineup-link { padding: 6px 8px; font-size: 0.7rem; }
-            .shineup-text { display: none; }
+            .shineup-link { padding: 6px 6px; font-size: 0.62rem; }
+            .shineup-text { display: inline; }
             .top-wrap { padding: 8px 6px 0; }
-            .phase-banner { font-size: 0.55rem; padding: 2px 5px; margin: 2px auto 2px; line-height: 1.35; }
+            .phase-banner { font-size: 0.55rem; padding: 2px 5px; margin: 2px auto 2px; line-height: 1.35; max-width: min(290px, calc(100% - 24px)); }
             .status-bar { gap: 8px; margin-bottom: 2px; }
             .stat-value { font-size: 0.88rem; }
             .stat-label { font-size: 0.4rem; }
@@ -607,7 +608,7 @@
 <div class="top-wrap">
     <div class="top-links">
         <a class="shineup-link" href="https://bbyakmyo.github.io/Shineup/" rel="noopener">🪄 <span class="shineup-text">얼티메이트 샤인 업!</span></a>
-        <a class="shineup-link" href="https://bbyakmyo.github.io/TRVault/" rel="noopener">🔒 <span class="shineup-text">스핑크스의 금고</span></a>
+        <a class="shineup-link" href="https://bbyakmyo.github.io/TRVault/" rel="noopener">🔒 <span class="shineup-text">스핑크스의 황금 금고</span></a>
     </div>
 </div>
 
@@ -663,7 +664,7 @@
                         <span>알고리즘 추천</span>
                     </div>
                 </div>
-                <div style="margin-top: 10px;">
+                <div class="line-state-wrap" style="margin-top: 10px;">
                     <div style="font-size:0.65rem; color:#6f7cc0; margin-bottom:5px; text-align:center;">라인 상태 (행5 · 열5 · 대각2)</div>
                     <div class="line-indicators" id="lineIndicators"></div>
                 </div>
