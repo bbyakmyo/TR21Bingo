@@ -483,25 +483,20 @@
             .rec-score { font-size: 0.68rem; }
 
             /* 위쪽 레이아웃 축소: 알고리즘 추천이 화면에 바로 보이도록 */
-            .header { padding: 10px 12px 4px; }
-            .header h1 { font-size: 1.25rem; margin-bottom: 2px; }
-            .header p { font-size: 0.68rem; }
-            .phase-banner { font-size: 0.72rem; padding: 5px 8px; margin: 3px auto 5px; }
-            .status-bar { gap: 12px; margin-bottom: 5px; }
-            .stat-value { font-size: 1.15rem; }
-            .stat-label { font-size: 0.5rem; }
-            .controls { margin-top: 6px; }
-            .line-indicators { margin-top: 5px; }
-            .legend { margin-top: 4px; }
-            .right-panel { gap: 8px; }
-        }
-        /* 짧은 화면(모바일 가로/소형)에서는 보조 요소 숨겨 알고리즘 추천 확보 */
-        @media (max-height: 640px) {
-            .header { padding: 4px 10px 0; }
+            .header { padding: 6px 12px 2px; }
+            .header h1 { font-size: 1.15rem; margin-bottom: 0; }
             .header p { display: none; }
-            .legend { display: none; }
-            .line-indicators { display: none; }
+            .phase-banner { font-size: 0.68rem; padding: 4px 8px; margin: 2px auto 4px; }
+            .status-bar { gap: 10px; margin-bottom: 3px; }
+            .stat-value { font-size: 1rem; }
+            .stat-label { font-size: 0.46rem; }
+            .controls { margin-top: 4px; }
+            .line-indicators { margin-top: 4px; }
+            .legend { margin-top: 3px; }
+            .right-panel { gap: 6px; }
+            .log { max-height: 70px; font-size: 0.62rem; }
         }
+        /* 짧은 화면(모바일 가로/소형): 한 화면에 다 들어가도록 보조 요소 숨김 + 보드 축소 */
         @media (max-width: 520px) and (min-width: 481px) {
             :root {
                 --board-size: calc(100vw - 56px);
@@ -520,31 +515,32 @@
                 --cell-h: calc((100vw - 48px) * 66 / 369);
                 --cell-gap: calc((100vw - 48px) * 3 / 369);
             }
-            .header { padding: 6px 10px 2px; }
-            .header h1 { font-size: 1.1rem; }
-            .header p { font-size: 0.62rem; }
+            .header { padding: 2px 8px 0; }
+            .header h1 { font-size: 1rem; margin: 0; }
+            .header p { font-size: 0.6rem; }
             .shineup-link { padding: 6px 9px; }
             .shineup-text { display: none; }
-            .phase-banner { font-size: 0.68rem; padding: 4px 8px; margin: 2px auto 4px; }
-            .status-bar { gap: 10px; margin-bottom: 3px; }
-            .stat-value { font-size: 1rem; }
-            .stat-label { font-size: 0.46rem; }
-            .container { padding: 0 6px 14px; grid-template-columns: 1fr; max-width: 100%; }
-            .card { padding: 10px 8px; border-radius: 10px; }
+            .phase-banner { font-size: 0.62rem; padding: 3px 6px; margin: 2px auto 3px; }
+            .status-bar { gap: 8px; margin-bottom: 2px; }
+            .stat-value { font-size: 0.88rem; }
+            .stat-label { font-size: 0.4rem; }
+            .container { padding: 0 6px 6px; grid-template-columns: 1fr; max-width: 100%; }
+            .card { padding: 6px 6px; border-radius: 8px; }
             .cell .cell-label { font-size: 0.5rem; }
             .cell.filled .cell-label { font-size: 0.55rem; }
             .cell .rank-badge { width: 15px; height: 15px; font-size: 0.5rem; top: -3px; right: -3px; }
             .line-ind { width: 28px; height: 18px; font-size: 0.48rem; }
-            .line-indicators { gap: 3px; }
-            .controls { gap: 8px; margin-top: 10px; }
-            .btn { padding: 8px 14px; font-size: 0.75rem; }
-            .rec-item { padding: 6px 8px; }
+            .line-indicators { display: none; }
+            .legend { display: none; }
+            .controls { gap: 8px; margin-top: 4px; }
+            .btn { padding: 5px 10px; font-size: 0.62rem; }
+            .rec-item { padding: 6px 4px; min-width: 66px; }
             .rec-rank { width: 20px; height: 20px; font-size: 0.6rem; }
-            .rec-pos { font-size: 0.75rem; }
+            .rec-pos { font-size: 0.68rem; }
             .rec-detail { font-size: 0.55rem; }
-            .rec-score { font-size: 0.75rem; }
-            .log { max-height: 140px; font-size: 0.65rem; }
-            .legend { font-size: 0.58rem; gap: 10px; }
+            .rec-score { font-size: 0.64rem; }
+            .log { max-height: 60px; font-size: 0.58rem; }
+            .footer { display: none; }
             .toast { font-size: 0.78rem; padding: 10px 16px; top: 10px; right: 10px; }
         }
 
@@ -556,9 +552,36 @@
                 --cell-h: calc((100vw - 32px) * 66 / 369);
                 --cell-gap: calc((100vw - 32px) * 3 / 369);
             }
-            .header h1 { font-size: 1rem; }
-            .container { padding: 0 4px 20px; }
-            .card { padding: 10px 8px; }
+            .header h1 { font-size: 0.92rem; }
+            .container { padding: 0 4px 6px; }
+            .card { padding: 6px 6px; }
+        }
+
+        /* 짧은 화면(모바일 가로/소형): 한 화면에 다 들어가도록 보조 요소 숨김 + 보드 축소 */
+        @media (max-height: 640px) {
+            :root {
+                --board-size: min(calc(100vw - 48px), 290px);
+                --cell-w: calc(var(--board-size) * 66 / 369);
+                --cell-h: calc(var(--board-size) * 66 / 369);
+                --cell-gap: calc(var(--board-size) * 3 / 369);
+            }
+            .header { padding: 2px 8px 0; }
+            .header p { display: none; }
+            .legend { display: none; }
+            .line-indicators { display: none; }
+            .right-panel .card:last-child { display: none; }
+            .footer { display: none; }
+        }
+        /* 아주 짧은 화면(모바일 가로 방향 등): 배너/상태바 숨기고 보드를 더 축소 */
+        @media (max-height: 500px) {
+            :root {
+                --board-size: min(calc(100vh - 210px), 250px);
+                --cell-w: calc(var(--board-size) * 66 / 369);
+                --cell-h: calc(var(--board-size) * 66 / 369);
+                --cell-gap: calc(var(--board-size) * 3 / 369);
+            }
+            .phase-banner { display: none; }
+            .status-bar { display: none; }
         }
     </style>
 </head>
