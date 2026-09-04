@@ -460,6 +460,26 @@
             letter-spacing: 1px;
         }
 
+        /* 빙고 확률 예측 */
+        .bp-mode { text-align: center; font-size: 0.62rem; font-weight: 800; color: #5a6cf2; margin-bottom: 4px; min-height: 1em; }
+        .bp-mode.bp-mode-preview { color: #d0557f; }
+        .bp-mode.bp-mode-down { color: #1976d2; }
+        .bingo-probs { display: flex; gap: 4px; flex-wrap: wrap; justify-content: center; margin-bottom: 8px; }
+        .bp-item { padding: 3px 7px; border-radius: 12px; background: rgba(90, 108, 242, 0.12); border: 1px solid rgba(90, 108, 242, 0.18); font-size: 0.6rem; font-weight: 700; color: #5a6cf2; white-space: nowrap; }
+        .bp-item .bp-val { font-weight: 900; color: #3d52d6; }
+        .bp-item.bp-top { background: rgba(64, 190, 240, 0.4); border-color: rgba(47, 192, 232, 0.6); color: #0d4a66; }
+        .bp-item.bp-top .bp-val { color: #0a3f5c; }
+
+        /* 통계 카드 */
+        .stats-body { font-size: 0.72rem; }
+        .stats-row { display: flex; justify-content: space-between; padding: 4px 0; border-bottom: 1px solid rgba(120, 140, 255, 0.12); }
+        .stats-row:last-child { border-bottom: none; }
+        .stats-row .k { color: #6f7cc0; }
+        .stats-row .v { font-weight: 800; color: #333f66; }
+        .stats-empty { color: #6f7cc0; font-size: 0.72rem; text-align: center; padding: 10px 0; }
+        .stats-actions { margin-top: 8px; text-align: center; }
+        .stats-actions button { padding: 4px 12px; font-size: 0.62rem; }
+
         /* ======================== 반응형: 태블릿 ======================== */
         @media (max-width: 860px) {
             .container {
@@ -557,7 +577,7 @@
             .rec-detail { font-size: 0.55rem; }
             .rec-score { font-size: 0.64rem; }
             .log { max-height: 60px; font-size: 0.58rem; }
-            .right-panel .card:last-child { display: none; }
+            .log-card, .stats-card { display: none; }
             .footer { display: none; }
             .toast { font-size: 0.78rem; padding: 10px 16px; top: 10px; right: 10px; }
         }
@@ -587,7 +607,7 @@
             .header p { display: none; }
             .legend { display: none; }
             .line-indicators { display: none; }
-            .right-panel .card:last-child { display: none; }
+            .log-card, .stats-card { display: none; }
             .footer { display: none; }
         }
         /* 아주 짧은 화면(모바일 가로 방향 등): 배너/상태바 숨기고 보드를 더 축소 */
@@ -647,6 +667,8 @@
     <div>
         <div class="card">
             <div class="board-area">
+                <div class="bp-mode" id="bpMode"></div>
+                <div class="bingo-probs" id="bingoProbs"></div>
                 <div class="board-bg">
                     <div class="board" id="board"></div>
                 </div>
@@ -671,6 +693,7 @@
             </div>
             <div class="controls">
                 <button class="btn btn-undo" id="btnUndo" onclick="undoLastTurn()" disabled>↩ 되돌리기</button>
+                <button class="btn btn-undo" id="btnRedo" onclick="redoLastTurn()" disabled>↪ 다시하기</button>
                 <button class="btn btn-danger" onclick="resetGame()">🔄 리셋</button>
             </div>
         </div>
@@ -689,10 +712,19 @@
         </div>
 
         <!-- Game Log -->
-        <div class="card">
+        <div class="card log-card">
             <div class="card-title">📜 게임 로그</div>
             <div class="log" id="gameLog">
                 <div style="color:#6f7cc0; font-size:0.75rem;">알고리즘 추천 셀을 클릭하여 시작하세요</div>
+            </div>
+        </div>
+
+        <!-- Stats -->
+        <div class="card stats-card">
+            <div class="card-title">📊 통계</div>
+            <div class="stats-body" id="statsBody"></div>
+            <div class="stats-actions">
+                <button class="btn btn-danger" id="btnStatsReset" onclick="resetStats()">기록 초기화</button>
             </div>
         </div>
     </div>
@@ -712,6 +744,7 @@ const LINES = [
     [0,6,12,18,24], [4,8,12,16,20]
 ];
 const LINE_NAMES = ['행1','행2','행3','행4','행5','열1','열2','열3','열4','열5','↘대각','↙대각'];
+const LINE_MASK = LINES.map(l => l.reduce((a, p) => a | (1 << p), 0));
 
 const CELL_LINES = Array.from({length: 25}, (_, i) =>
     LINES.reduce((acc, line, j) => { if (line.includes(i)) acc.push(j); return acc; }, [])
@@ -798,6 +831,8 @@ function getRecommendations(filled, remainingClicks) {
 // phase: 'player' = 알고리즘 추천 보고 플레이어가 자기 셀 선택
 //        'random' = 플레이어가 랜덤 배치할 곳 선택
 //        'done'   = 게임 종료
+let gameStartPred = null; // 게임 시작 시점의 예측 (기록용)
+
 let gameState = {
     filled: new Set(),
     playerCells: new Set(),
@@ -808,6 +843,7 @@ let gameState = {
     recommendations: [],
     log: [],
     history: [],        // undo용 스냅샷
+    redoStack: [],      // redo용 스냅샷
     pendingPlayerPos: -1 // player가 선택한 셀 (random 대기중)
 };
 
@@ -834,6 +870,7 @@ function restoreSnapshot(snap) {
 }
 
 function resetGame() {
+    gameStartPred = null;
     gameState = {
         filled: new Set(),
         playerCells: new Set(),
@@ -844,6 +881,7 @@ function resetGame() {
         recommendations: [],
         log: [],
         history: [],
+        redoStack: [],
         pendingPlayerPos: -1
     };
     updateAll();
@@ -852,10 +890,20 @@ function resetGame() {
 
 function undoLastTurn() {
     if (gameState.history.length === 0) return;
+    gameState.redoStack.push(snapshot());
     const snap = gameState.history.pop();
     restoreSnapshot(snap);
     updateAll();
     showToast('되돌리기 완료', 'info');
+}
+
+function redoLastTurn() {
+    if (gameState.redoStack.length === 0) return;
+    gameState.history.push(snapshot());
+    const snap = gameState.redoStack.pop();
+    restoreSnapshot(snap);
+    updateAll();
+    showToast('다시하기 완료', 'info');
 }
 
 // ============================================================
@@ -866,8 +914,9 @@ function handleCellClick(pos) {
     if (gameState.filled.has(pos)) return;
 
     if (gameState.phase === 'player') {
-        // 스냅샷 저장 (undo용)
+        // 스냅샷 저장 (undo용) / redo 스택 초기화
         gameState.history.push(snapshot());
+        gameState.redoStack = [];
 
         // 플레이어 셀 선택
         gameState.filled.add(pos);
@@ -892,6 +941,7 @@ function handleCellClick(pos) {
                 const bingo = countBingo(gameState.filled);
                 gameState.log.push(`<b>🎯 게임 종료! ${bingo}빙고!</b>`);
                 showToast(`게임 종료! ${bingo}빙고 달성!`, 'success');
+                saveGameRecord();
             } else {
                 gameState.phase = 'player';
             }
@@ -919,6 +969,7 @@ function handleCellClick(pos) {
             gameState.phase = 'done';
             gameState.log.push(`<b>🎯 게임 종료! ${bingo}빙고!</b>`);
             showToast(`게임 종료! ${bingo}빙고 달성!`, 'success');
+            saveGameRecord();
         } else {
             gameState.phase = 'player';
         }
@@ -933,6 +984,7 @@ function handleCellClick(pos) {
 function updateAll() {
     updateRecommendations();
     updateUI();
+    updateBingoProbs();
 }
 
 function updateUI() {
@@ -1014,6 +1066,12 @@ function updateUI() {
             }
 
             cell.onclick = () => handleCellClick(i);
+
+            // 호버 미리보기: 이 칸 선택 시 확률 변화
+            if (gameState.phase !== 'done') {
+                cell.onmouseenter = function () { previewPick(i); };
+                cell.onmouseleave = function () { clearPreview(); };
+            }
         }
 
         cell.appendChild(label);
@@ -1045,6 +1103,7 @@ function updateUI() {
 
     // Undo button
     document.getElementById('btnUndo').disabled = gameState.history.length === 0;
+    document.getElementById('btnRedo').disabled = gameState.redoStack.length === 0;
 }
 
 function updateRecommendations() {
@@ -1091,7 +1150,7 @@ function updateRecommendations() {
             let detail = `라인: ${lines.map(li => LINE_NAMES[li]).join(', ')}`;
             if (willComplete.length) detail = `✅ 완성: ${willComplete.join(', ')}`;
 
-            return `<li class="rec-item" onclick="handleCellClick(${r.pos})">
+            return `<li class="rec-item" onclick="handleCellClick(${r.pos})" onmouseenter="previewPick(${r.pos})" onmouseleave="clearPreview()">
                 <div class="rec-rank ${rankClass}">${i + 1}</div>
                 <div class="rec-info">
                     <div class="rec-pos">(${row}, ${col})</div>
@@ -1113,10 +1172,203 @@ function showToast(msg, type = 'info') {
     setTimeout(() => t.classList.remove('show'), 2500);
 }
 
+// 빙고 확률 예측 (현재 상태 기준 몬테카를로)
+// 모델: 1픽 = 알고리즘 추천(v3), 2픽 = 무작위
+// ============================================================
+function pc(x) { x = x - ((x >>> 1) & 0x55555555); x = (x & 0x33333333) + ((x >>> 2) & 0x33333333); x = (x + (x >>> 4)) & 0x0f0f0f0f; return (x * 0x01010101) >>> 24; }
+function countBingoMask(m) { let c = 0; for (const lm of LINE_MASK) if ((m & lm) === lm) c++; return c; }
+function setToMask(set) { let m = 0; for (const p of set) m |= (1 << p); return m; }
+function mulberry32(a) { return function () { a |= 0; a = a + 0x6D2B79F5 | 0; let t = Math.imul(a ^ a >>> 15, 1 | a); t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t; return ((t ^ t >>> 14) >>> 0) / 4294967296; }; }
+function randEmptyMask(mask, rng) { const e = []; for (let i = 0; i < 25; i++) if (!(mask >> i & 1)) e.push(i); return e[(rng() * e.length) | 0]; }
+
+function cellScoreV3Mask(pos, mask, remainingRounds) {
+    let score = 0;
+    const totalFuture = remainingRounds * 2;
+    const emptyCount = Math.max(1, 25 - pc(mask) - 1);
+    let completions = 0, nearComplete = 0;
+    for (const li of CELL_LINES[pos]) {
+        const lm = LINE_MASK[li];
+        const filledCount = pc(mask & lm);
+        const needed = 4 - filledCount;
+        if (needed === 0) { completions++; score += 50000; }
+        else if (needed === 1) { nearComplete++; const p = 1 - Math.pow(1 - 1 / emptyCount, remainingRounds); score += 3000 * p; }
+        else if (needed === 2) { score += totalFuture >= needed ? 80 : 10; }
+        else if (needed === 3) { score += remainingRounds >= 5 ? 8 : 1; }
+    }
+    if (completions >= 2) score += completions * 15000;
+    if (nearComplete >= 2) score += nearComplete * 300;
+    score += CELL_LINES[pos].length * 3;
+    return score;
+}
+function pickV3Mask(mask, roundsLeft) {
+    let bs = -1e18, best = -1;
+    for (let i = 0; i < 25; i++) if (!(mask >> i & 1)) {
+        const s = cellScoreV3Mask(i, mask, roundsLeft);
+        if (s > bs + 1e-9) { bs = s; best = i; }
+    }
+    return best;
+}
+function rollFromState(mask, round, phase, rng) {
+    while (round < 8) {
+        if (phase === 'player') {
+            mask |= 1 << pickV3Mask(mask, 8 - round);
+            phase = 'random';
+        } else {
+            mask |= 1 << randEmptyMask(mask, rng);
+            round++;
+            phase = 'player';
+        }
+    }
+    return countBingoMask(mask);
+}
+
+const PROB_LABELS = ['0빙고', '1빙고', '2빙고', '3빙고', '4빙고', '5빙고'];
+let probCache = { counts: null, mean: 0 };
+
+function computeDist(mask, round, phase, N) {
+    const rng = mulberry32((mask ^ (mask >>> 16) ^ 0x9e3779b9) >>> 0);
+    const counts = new Array(6).fill(0);
+    let sumB = 0;
+    for (let n = 0; n < N; n++) {
+        const b = rollFromState(mask, round, phase, rng);
+        counts[Math.min(b, 5)]++;
+        sumB += b;
+    }
+    return { counts: counts, mean: sumB / N };
+}
+
+function renderProbs(counts, modeText, modeClass) {
+    const el = document.getElementById('bingoProbs');
+    if (!el) return;
+    let best = 0, bestV = -1, total = 0;
+    counts.forEach(function (v, i) { total += v; if (v > bestV) { bestV = v; best = i; } });
+    if (total === 0) total = 1;
+    const modeEl = document.getElementById('bpMode');
+    if (modeEl) {
+        modeEl.textContent = modeText;
+        modeEl.className = 'bp-mode' + (modeClass || '');
+    }
+    el.innerHTML = counts.map(function (v, i) {
+        return '<span class="bp-item' + (i === best && v > 0 ? ' bp-top' : '') + '">' + PROB_LABELS[i] + ' <span class="bp-val">' + (v / total * 100).toFixed(1) + '%</span></span>';
+    }).join('');
+}
+
+function updateBingoProbs() {
+    const el = document.getElementById('bingoProbs');
+    if (!el) return;
+    if (gameState.phase === 'done') {
+        const raw = countBingo(gameState.filled);
+        const b = Math.min(raw, 5);
+        probCache = { counts: PROB_LABELS.map(function (_, i) { return i === b ? 1 : 0; }), mean: raw, N: 1 };
+        const modeEl = document.getElementById('bpMode');
+        if (modeEl) { modeEl.textContent = '게임 종료'; modeEl.className = 'bp-mode'; }
+        el.innerHTML = PROB_LABELS.map(function (label, i) {
+            return '<span class="bp-item' + (i === b ? ' bp-top' : '') + '">' + label + ' <span class="bp-val">' + (i === b ? '100' : '0') + '.0%</span></span>';
+        }).join('');
+        return;
+    }
+    const mask = setToMask(gameState.filled);
+    const d = computeDist(mask, gameState.round, gameState.phase, 2000);
+    probCache = d;
+    if (gameState.filled.size === 0 && gameState.round === 0 && !gameStartPred) {
+        let best = 0, bestV = -1;
+        d.counts.forEach(function (v, i) { if (v > bestV) { bestV = v; best = i; } });
+        gameStartPred = { best: best, mean: d.mean };
+    }
+    renderProbs(d.counts, '현재 예측 · 평균 ' + d.mean.toFixed(2) + '빙고', false);
+}
+
+function previewPick(pos) {
+    if (gameState.phase === 'done') return;
+    if (gameState.filled.has(pos)) return;
+    if (!probCache.counts) updateBingoProbs();
+    const mask = setToMask(gameState.filled) | (1 << pos);
+    let round = gameState.round, phase = gameState.phase;
+    if (phase === 'player') { phase = 'random'; }
+    else { round++; phase = 'player'; }
+    const d = computeDist(mask, round, phase, 1200);
+    const delta = d.mean - probCache.mean;
+    const row = Math.floor(pos / 5), col = pos % 5;
+    const modeClass = delta < 0 ? ' bp-mode-down' : ' bp-mode-preview';
+    renderProbs(d.counts, '선택 시 (' + row + ',' + col + ') · 평균 ' + d.mean.toFixed(2) + '빙고 (' + (delta >= 0 ? '▲+' : '▼') + delta.toFixed(2) + ')', modeClass);
+}
+
+function clearPreview() {
+    if (gameState.phase === 'done') { updateBingoProbs(); return; }
+    if (!probCache.counts) return;
+    renderProbs(probCache.counts, '현재 예측 · 평균 ' + probCache.mean.toFixed(2) + '빙고', false);
+}
+
+// ============================================================
+// 게임 통계 (localStorage)
+// ============================================================
+function loadStats() {
+    try { return JSON.parse(localStorage.getItem('bingoStats') || '{"games":[]}'); }
+    catch (e) { return { games: [] }; }
+}
+function saveStats(s) { try { localStorage.setItem('bingoStats', JSON.stringify(s)); } catch (e) {} }
+
+function saveGameRecord() {
+    const actual = countBingo(gameState.filled);
+    const s = loadStats();
+    s.games.push({
+        t: Date.now(),
+        actual: actual,
+        predBest: gameStartPred ? gameStartPred.best : null,
+        predMean: gameStartPred ? gameStartPred.mean : null
+    });
+    if (s.games.length > 500) s.games = s.games.slice(-500);
+    saveStats(s);
+    renderStatsCard();
+}
+
+function renderStatsCard() {
+    const body = document.getElementById('statsBody');
+    if (!body) return;
+    const games = loadStats().games || [];
+    if (games.length === 0) {
+        body.innerHTML = '<div class="stats-empty">아직 기록이 없습니다</div>';
+        return;
+    }
+    const n = games.length;
+    const avg = games.reduce(function (a, g) { return a + g.actual; }, 0) / n;
+    const best = Math.max.apply(null, games.map(function (g) { return g.actual; }));
+    const withPred = games.filter(function (g) { return g.predBest !== null && g.predBest !== undefined; });
+    const hits = withPred.filter(function (g) { return Math.min(g.actual, 5) === g.predBest; }).length;
+    const hitRate = withPred.length ? (hits / withPred.length * 100).toFixed(0) + '%' : '-';
+    const rows = [
+        ['판 수', n + '판'],
+        ['평균 빙고', avg.toFixed(2)],
+        ['최고 기록', best + '빙고'],
+        ['예측 적중률', withPred.length ? hits + '/' + withPred.length + ' (' + hitRate + ')' : '-']
+    ];
+    body.innerHTML = rows.map(function (r) {
+        return '<div class="stats-row"><span class="k">' + r[0] + '</span><span class="v">' + r[1] + '</span></div>';
+    }).join('');
+}
+
+function resetStats() {
+    if (!confirm('저장된 통계를 모두 삭제할까요?')) return;
+    saveStats({ games: [] });
+    renderStatsCard();
+    showToast('통계가 초기화되었습니다', 'info');
+}
+
+// ============================================================
+// 키보드 단축키 (Ctrl+Z 되돌리기 / Ctrl+Y 다시하기)
+// ============================================================
+document.addEventListener('keydown', function (e) {
+    if (!(e.ctrlKey || e.metaKey)) return;
+    const k = (e.key || '').toLowerCase();
+    if (k === 'z' && !e.shiftKey) { e.preventDefault(); undoLastTurn(); }
+    else if (k === 'y' || (k === 'z' && e.shiftKey)) { e.preventDefault(); redoLastTurn(); }
+});
+
 // ============================================================
 // 초기화
 // ============================================================
 updateAll();
+renderStatsCard();
 </script>
 
 </body>
