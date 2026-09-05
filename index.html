@@ -489,7 +489,7 @@
         .stats-actions { margin-top: 8px; text-align: center; }
         .stats-actions button { padding: 4px 12px; font-size: 0.62rem; }
 
-        /* 화면 자동 감지 (캡처) */
+        /* 화면 자동 캡처 (캡처) */
         .hidden { display: none !important; }
         .detect-modal { position: fixed; inset: 0; z-index: 1100; display: flex; align-items: center; justify-content: center; background: rgba(15, 20, 60, 0.72); }
         .detect-modal.hidden { display: none; }
@@ -763,7 +763,7 @@
                     <button class="btn btn-danger manual-btn" onclick="resetGame()">🔄 리셋</button>
                 </div>
                 <div class="ctrl-row ctrl-detect">
-                    <button class="btn btn-undo" id="btnCapture" onclick="openCapture()">📸 화면 감지</button>
+                    <button class="btn btn-undo" id="btnCapture" onclick="openCapture()">📸 화면 캡처</button>
                     <button class="btn btn-undo detect-ctrl hidden" id="btnDetectPause" onclick="togglePause()">⏸ 일시 정지</button>
                     <button class="btn btn-danger detect-ctrl hidden" id="btnDetectStop" onclick="stopCapture()">⏹ 정지</button>
                 </div>
@@ -814,8 +814,8 @@
             <button class="detect-close" id="btnGuideClose">✕</button>
         </div>
         <div class="guide-body">
-            <div class="guide-sub">Tales Runner 빙고 보드를 실시간으로 감지해 자동으로 채웁니다</div>
-            <div class="guide-step"><span class="num">1</span>보드 아래 <b>📸 화면 감지</b> 버튼을 누르세요</div>
+            <div class="guide-sub">Tales Runner 빙고 보드를 실시간으로 캡처해 자동으로 채웁니다</div>
+            <div class="guide-step"><span class="num">1</span>보드 아래 <b>📸 화면 캡처</b> 버튼을 누르세요</div>
             <div class="guide-step"><span class="num">2</span>모달의 <b>미리보기 칸(🖥️ 클릭하여 화면 공유)</b>을 클릭하면 브라우저의 <b>화면 공유 선택창</b>이 뜹니다:
                 <div class="guide-detail">· 상단에서 <b>"창"</b> 탭을 선택하세요</div>
                 <div class="guide-detail">· 창 목록에서 <b>Tales Runner</b> 게임 창을 <b>클릭</b>해 선택하세요 (목록에 안 보이면 게임 창을 화면에 띄워두세요)</div>
@@ -823,20 +823,20 @@
                 <div class="guide-detail">· ⚠️ 브라우저 탭이나 전체 화면이 아니라 <b>게임 창 자체</b>를 선택해야 보드가 정확히 인식됩니다</div>
             </div>
             <div class="guide-step"><span class="num">3</span>공유된 화면에서 <b>빙고 보드 전체를 드래그</b>로 감싸세요 (아래 그림). 놓으면 파란 테두리로 영역이 표시됩니다</div>
-            <div class="guide-step"><span class="num">4</span><b>✅ 확인 (감지 시작)</b>을 누르면 영역이 5×5로 나뉘어 매 0.5초마다 감지됩니다</div>
-            <div class="guide-step"><span class="num">5</span>감지 중에는 <b>되돌리기/다시하기/리셋</b>이 숨겨지고 <b>⏸ 일시 정지 / ⏹ 정지</b>가 표시됩니다. 보드가 초기화되면 게임도 자동 리셋됩니다</div>
-            <div class="guide-step"><span class="num">6</span>모달을 닫아도 감지는 계속되며 좌하단 <b>📸 감지 중 (n/25)</b> 배지로 중지/일시정지할 수 있습니다</div>
+            <div class="guide-step"><span class="num">4</span><b>✅ 확인 (캡처 시작)</b>을 누르면 영역이 5×5로 나뉘어 매 0.5초마다 캡처됩니다</div>
+            <div class="guide-step"><span class="num">5</span>캡처 중에는 <b>되돌리기/다시하기/리셋</b>이 숨겨지고 <b>⏸ 일시 정지 / ⏹ 정지</b>가 표시됩니다. 보드가 초기화되면 게임도 자동 리셋됩니다</div>
+            <div class="guide-step"><span class="num">6</span>모달을 닫아도 캡처는 계속되며 좌하단 <b>📸 캡처 중 (n/25)</b> 배지로 중지/일시정지할 수 있습니다</div>
             <div class="guide-imgbox"><img src="IMG/Instruction_1.png" alt="범위 선택 방법"><div class="cap">▲ 보드 전체를 드래그로 감싸면 5×5로 나누어 인식합니다</div></div>
-            <div class="guide-warn">⚠️ 참고: 화면 공유는 HTTPS(GitHub Pages)에서 동작합니다. 감지 정확도를 위해 드래그 시 보드의 파란 테두리까지 포함하세요.</div>
+            <div class="guide-warn">⚠️ 참고: 화면 공유는 HTTPS(GitHub Pages)에서 동작합니다. 캡처 정확도를 위해 드래그 시 보드의 파란 테두리까지 포함하세요.</div>
         </div>
     </div>
 </div>
 
-<!-- 화면 감지 모달 -->
+<!-- 화면 캡처 모달 -->
 <div class="detect-modal hidden" id="detectModal">
     <div class="detect-panel">
         <div class="detect-head">
-            <span class="detect-title">📸 화면 자동 감지</span>
+            <span class="detect-title">📸 화면 자동 캡처</span>
             <div class="detect-head-btns">
                 <button class="detect-guide-btn" id="btnDetectGuide">❓ 사용법</button>
                 <button class="detect-close" id="btnDetectClose">✕</button>
@@ -854,14 +854,14 @@
             <div class="detect-status" id="detectStatus">-</div>
             <div class="detect-grid" id="detectGrid"></div>
             <div class="detect-btns">
-                <button class="btn btn-undo" id="btnDetectConfirm" disabled>✅ 확인 (감지 시작)</button>
+                <button class="btn btn-undo" id="btnDetectConfirm" disabled>✅ 확인 (캡처 시작)</button>
             </div>
         </div>
     </div>
 </div>
 
-<!-- 실시간 감지 배지 -->
-<div class="detect-chip hidden" id="detectChip">📸 <span id="detectChipLabel">감지 중</span> (<span id="detectChipCount">0/25</span>) <button id="btnDetectChipPause">⏸</button> <button id="btnDetectChipStop">중지</button></div>
+<!-- 실시간 캡처 배지 -->
+<div class="detect-chip hidden" id="detectChip">📸 <span id="detectChipLabel">캡처 중</span> (<span id="detectChipCount">0/25</span>) <button id="btnDetectChipPause">⏸</button> <button id="btnDetectChipStop">중지</button></div>
 
 <!-- 드래그 확대 보기 -->
 <div class="mag-wrap" id="magWrap"><canvas id="magCanvas"></canvas></div>
@@ -1491,7 +1491,7 @@ function resetStats() {
 // ============================================================
 document.addEventListener('keydown', function (e) {
     if (!(e.ctrlKey || e.metaKey)) return;
-    if (cap.running) return; // 감지 모드에서는 수동 되돌리기 비활성
+    if (cap.running) return; // 캡처 모드에서는 수동 되돌리기 비활성
     const k = (e.key || '').toLowerCase();
     if (k === 'z' && !e.shiftKey) { e.preventDefault(); undoLastTurn(); }
     else if (k === 'y' || (k === 'z' && e.shiftKey)) { e.preventDefault(); redoLastTurn(); }
@@ -1501,7 +1501,7 @@ document.addEventListener('keydown', function (e) {
 
 
 // ============================================================
-// 화면 자동 감지 (캡처 + 템플릿 매칭) - is_active / is_bingo 자동 채우기
+// 화면 자동 캡처 (캡처 + 템플릿 매칭) - is_active / is_bingo 자동 채우기
 // ============================================================
 const CAP_TEMPLATES = {};
 CAP_TEMPLATES.is_active = new Uint8ClampedArray([176,37,115,55,213,97,164,147,210,106,165,148,210,103,163,148,210,103,163,148,210,103,163,148,210,103,163,148,210,103,163,148,210,103,163,148,210,103,163,148,211,108,168,148,206,89,156,143,202,89,153,156,255,191,243,255,255,179,229,255,255,180,229,255,255,180,229,255,255,179,228,255,255,180,228,255,255,180,229,255,255,179,228,255,255,179,228,255,255,181,230,255,255,180,235,255,208,99,159,149,255,171,222,255,255,155,204,255,254,151,201,255,253,146,198,255,253,145,197,255,254,146,198,255,254,151,201,255,255,155,204,255,255,155,204,255,255,155,205,255,255,165,216,255,208,98,158,148,255,177,219,255,253,152,196,255,253,149,194,255,253,152,196,255,255,157,199,255,253,152,196,255,253,152,196,255,255,162,202,255,255,162,202,255,255,163,203,255,255,169,213,255,208,101,158,148,255,177,212,255,253,155,192,255,254,161,196,255,255,166,198,255,255,167,199,255,253,156,192,255,254,162,196,255,254,163,197,255,253,159,194,255,255,169,200,255,255,175,212,255,208,103,156,148,255,179,208,255,254,163,191,255,255,171,196,255,255,177,199,255,253,166,192,255,253,162,191,255,253,165,192,255,252,160,190,255,254,167,194,255,255,176,198,255,255,180,209,255,208,105,156,148,255,191,208,255,254,170,188,255,255,177,192,255,253,173,190,255,253,167,187,255,255,178,193,255,254,176,191,255,253,169,188,255,255,178,193,255,255,183,195,255,255,186,206,255,208,105,155,148,255,203,209,255,255,187,190,255,253,176,186,255,253,176,185,255,255,187,191,255,255,190,193,255,254,183,189,255,253,176,185,255,255,190,192,255,255,190,192,255,255,192,204,255,208,108,155,148,255,208,205,255,253,181,182,255,253,181,182,255,254,189,186,255,254,191,186,255,254,190,187,255,253,182,183,255,254,186,185,255,254,188,185,255,255,194,187,255,255,199,202,255,208,111,155,148,255,202,198,255,254,186,179,255,254,189,181,255,253,186,180,255,253,186,180,255,253,187,180,255,253,186,180,255,253,188,181,255,253,185,180,255,255,190,181,255,255,198,197,255,210,115,156,150,255,225,202,255,255,212,184,255,255,212,185,255,255,211,185,255,255,212,186,255,255,210,184,255,255,210,184,255,255,211,185,255,255,213,186,255,255,213,184,255,255,217,201,255,195,68,135,149,255,176,201,255,255,176,190,255,255,174,190,255,255,174,190,255,255,174,190,255,255,175,190,255,255,174,190,255,255,174,190,255,255,174,190,255,255,179,192,255,255,161,193,255]);
@@ -1532,7 +1532,7 @@ function openCapture() {
     document.getElementById('detectChip').classList.add('hidden');
     if (cap.running) {
         document.getElementById('stagePlaceholder').classList.add('hidden');
-        updateDetectStatus('실시간 감지 중');
+        updateDetectStatus('실시간 캡처 중');
         return;
     }
     if (cap.stream) {
@@ -1679,7 +1679,7 @@ function endDrag() {
     cap.region = { left: left / vRect.width, top: top / vRect.height, width: width / vRect.width, height: height / vRect.height };
     updateStageCache();
     document.getElementById('btnDetectConfirm').disabled = false;
-    updateDetectStatus('영역 지정 완료 - 5×5로 나누어 감지합니다. ✅ 확인을 누르세요');
+    updateDetectStatus('영역 지정 완료 - 5×5로 나누어 캡처합니다. ✅ 확인을 누르세요');
 }
 
 function cellRect(i) {
@@ -1701,7 +1701,7 @@ function mseDiff(a, b) {
 }
 // 보상창/팝업 등이 보드 위에 떠서 칸 내용과 크게 다르면 채움으로 오인하지 않도록 하는 MSE 상한
 const CAP_FILL_MSE = 12000;
-const CAP_CONFIRM_TICKS = 2; // 2틱 연속 감지되어야 확정 (일시적 겹침 배제)
+const CAP_CONFIRM_TICKS = 2; // 2틱 연속 캡처되어야 확정 (일시적 겹침 배제)
 const CAP_RESET_TICKS = 3;   // 보드가 명확히 빈 상태가 3틱 지속되면 사이트도 리셋
 
 function classifyCell(data) {
@@ -1734,7 +1734,7 @@ function detectTick() {
         const filled = cand && cap.confirm[i] >= CAP_CONFIRM_TICKS;
         states[i] = filled;
         unknowns[i] = unknown;
-        // 감지된 채움 칸은 매 틱 게임에 실시간 반영 (리셋/되돌리기 후에도 재동기화)
+        // 캡처된 채움 칸은 매 틱 게임에 실시간 반영 (리셋/되돌리기 후에도 재동기화)
         if (filled && !gameState.filled.has(i) && gameState.phase !== 'done') {
             newly.push(i);
         }
@@ -1747,12 +1747,12 @@ function detectTick() {
     }
     const filledCount = states.filter(Boolean).length;
     const unknownCount = unknowns.filter(Boolean).length;
-    let msg = '실시간 감지 중 · 보드 ' + filledCount + '/25 채움 감지';
+    let msg = '실시간 캡처 중 · 보드 ' + filledCount + '/25 채움 캡처';
     if (unknownCount > 0) msg += ' · ⚠ ' + unknownCount + '칸 인식 불가 (팝업/창 겹침)';
     updateDetectStatus(msg);
     document.getElementById('detectChipCount').textContent = filledCount + '/25';
 
-    // 캡처 보드 초기화 감지 → 사이트도 함께 리셋
+    // 캡처 보드 초기화 캡처 → 사이트도 함께 리셋
     // 1) 완전히 빈 상태가 CAP_RESET_TICKS 연속 (느린 초기화)
     const clearlyEmpty = filledCount === 0 && unknownCount === 0;
     if (clearlyEmpty) cap.emptyTicks++;
@@ -1798,7 +1798,7 @@ function startDetection() {
     detectTick();
     closeCapture();
     updateDetectUI();
-    showToast('화면 감지를 시작했습니다', 'success');
+    showToast('화면 캡처를 시작했습니다', 'success');
 }
 
 function stopCapture() {
@@ -1814,7 +1814,7 @@ function stopCapture() {
 
 function updateDetectStatus(msg) { document.getElementById('detectStatus').textContent = msg; }
 
-// 감지 모드 UI: 수동 버튼 숨기고 일시정지/정지 표시
+// 캡처 모드 UI: 수동 버튼 숨기고 일시정지/정지 표시
 function updateDetectUI() {
     const on = cap.running;
     document.querySelectorAll('.manual-btn').forEach(function (b) { b.classList.toggle('hidden', on); });
@@ -1828,13 +1828,13 @@ function togglePause() {
     cap.paused = !cap.paused;
     updateDetectUI();
     const chipLabel = document.getElementById('detectChipLabel');
-    if (chipLabel) chipLabel.textContent = cap.paused ? '일시 정지' : '감지 중';
+    if (chipLabel) chipLabel.textContent = cap.paused ? '일시 정지' : '캡처 중';
     if (cap.paused) {
         updateDetectStatus('⏸ 일시 정지 중 — ▶ 재개를 누르면 계속합니다');
-        showToast('화면 감지를 일시 정지했습니다', 'info');
+        showToast('화면 캡처를 일시 정지했습니다', 'info');
     } else {
-        updateDetectStatus('실시간 감지 중 · 보드 ' + (gameState.filled.size) + '/25 채움 감지');
-        showToast('화면 감지를 재개했습니다', 'info');
+        updateDetectStatus('실시간 캡처 중 · 보드 ' + (gameState.filled.size) + '/25 채움 캡처');
+        showToast('화면 캡처를 재개했습니다', 'info');
     }
 }
 
@@ -1848,7 +1848,7 @@ document.getElementById('btnDetectClose').addEventListener('click', function () 
 });
 document.getElementById('btnDetectConfirm').addEventListener('click', startDetection);
 document.getElementById('btnDetectReset').addEventListener('click', function () {
-    // 감지 중이면 먼저 중지
+    // 캡처 중이면 먼저 중지
     cap.running = false;
     cap.paused = false;
     if (cap.timer) { clearInterval(cap.timer); cap.timer = null; }
@@ -1868,7 +1868,7 @@ document.getElementById('btnDetectReset').addEventListener('click', function () 
     startScreenCapture();
 });
 document.getElementById('btnDetectChipPause').addEventListener('click', function () { togglePause(); });
-document.getElementById('btnDetectChipStop').addEventListener('click', function () { stopCapture(); showToast('화면 감지를 중지했습니다', 'info'); });
+document.getElementById('btnDetectChipStop').addEventListener('click', function () { stopCapture(); showToast('화면 캡처를 중지했습니다', 'info'); });
 
 document.getElementById('detectStage').addEventListener('mousedown', startDrag);
 document.getElementById('detectStage').addEventListener('click', function () {
