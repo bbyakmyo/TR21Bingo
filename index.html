@@ -1522,6 +1522,8 @@ frameCv: null, frameCtx: null,
     confirm: new Array(25).fill(0),
     emptyTicks: 0,
     lastFilled: 0,
+    vanishTicks: 0,
+    resetCooldown: 0,
     paused: false
 };
 const CAP_TPL_SIZE = 12;
@@ -1739,12 +1741,9 @@ function detectTick() {
             newly.push(i);
         }
     }
+    const prevStates = cap.prev;
     cap.prev = states;
     updateDetectGrid(states, unknowns);
-    for (const pos of newly) {
-        if (gameState.phase === 'done') break;
-        if (!gameState.filled.has(pos)) handleCellClick(pos);
-    }
     const filledCount = states.filter(Boolean).length;
     const unknownCount = unknowns.filter(Boolean).length;
     let msg = '실시간 캡처 중 · 보드 ' + filledCount + '/25 채움 캡처';
@@ -1752,19 +1751,49 @@ function detectTick() {
     updateDetectStatus(msg);
     document.getElementById('detectChipCount').textContent = filledCount + '/25';
 
-    // 캡처 보드 초기화 캡처 → 사이트도 함께 리셋
-    // 1) 완전히 빈 상태가 CAP_RESET_TICKS 연속 (느린 초기화)
+    // 캡처 보드 초기화 캡처 → 사이트도 함께 리셋 (새 칸 채우기보다 먼저)
+    // 실제 초기화는 "이전에 채운 칸이 거의 전부 동시에 비워지는" 것. 노이즈는 1~2칸만 영향.
+    let prevFilled = 0, unfilledPrev = 0;
+    for (let i = 0; i < 25; i++) {
+        if (prevStates[i]) {
+            prevFilled++;
+            if (!states[i] && !unknowns[i]) unfilledPrev++;
+        }
+    }
+    const vanishRatio = prevFilled > 0 ? unfilledPrev / prevFilled : 0;
+
+    if (cap.resetCooldown > 0) cap.resetCooldown--;
+
+    // 1) 강한 신호: 이전 채운 칸의 70% 이상이 비워짐 → 즉시 리셋
+    // 2) 중간 신호: 40% 이상 → 2틱 연속이면 리셋
+    // 3) 완전히 빈 상태가 CAP_RESET_TICKS 연속 + 이전에 칸이 있었을 때 (느린 초기화)
+    if (vanishRatio >= 0.7) cap.vanishTicks = 2;
+    else if (vanishRatio >= 0.4) cap.vanishTicks = Math.min(2, cap.vanishTicks + 1);
+    else cap.vanishTicks = 0;
+
     const clearlyEmpty = filledCount === 0 && unknownCount === 0;
     if (clearlyEmpty) cap.emptyTicks++;
     else cap.emptyTicks = 0;
-    // 2) 빠른 초기화: 이전에 칸이 여러 개였는데 절반 이하로 급감하고 가림(unknown) 없으면 즉시 리셋
-    const quickReset = cap.lastFilled >= 4 && filledCount <= Math.max(1, Math.floor(cap.lastFilled / 2)) && unknownCount === 0 && filledCount < cap.lastFilled;
-    if ((cap.emptyTicks >= CAP_RESET_TICKS || quickReset) && gameState.filled.size > 0) {
+
+    const shouldReset = gameState.filled.size > 0 && cap.resetCooldown === 0 && (
+        vanishRatio >= 0.7 ||
+        cap.vanishTicks >= 2 ||
+        (cap.emptyTicks >= CAP_RESET_TICKS && cap.lastFilled >= 4)
+    );
+    if (shouldReset) {
+        cap.resetCooldown = 6; // 리셋 후 3초간 재리셋 방지 (진동 방지)
         cap.emptyTicks = 0;
+        cap.vanishTicks = 0;
         cap.lastFilled = filledCount;
         resetGame();
     }
     cap.lastFilled = filledCount;
+
+    // 리셋 판정이 끝난 뒤 새로 채워진 칸을 게임에 반영 (리셋으로 지워지지 않도록)
+    for (const pos of newly) {
+        if (gameState.phase === 'done') break;
+        if (!gameState.filled.has(pos)) handleCellClick(pos);
+    }
 }
 
 function updateDetectGrid(states, unknowns) {
